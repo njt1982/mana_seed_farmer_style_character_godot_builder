@@ -6,22 +6,23 @@ class_name Character
 @export_group("Character Config")
 @export_dir var opt_dir = "res://assets/farmer_base_sheets"
 
-var option_00undr : String
-var option_01body : String
-var option_02sock : String
-var option_03fot1 : String
-var option_04lwr1 : String
-var option_05shrt : String
-var option_06lwr2 : String
-var option_07fot2 : String
-var option_08lwr3 : String
-var option_09hand : String
-var option_10outr : String
-var option_11neck : String
-var option_12face : String
-var option_13hair : String
-var option_14head : String
+#var option_00undr : String
+#var option_01body : String
+#var option_02sock : String
+#var option_03fot1 : String
+#var option_04lwr1 : String
+#var option_05shrt : String
+#var option_06lwr2 : String
+#var option_07fot2 : String
+#var option_08lwr3 : String
+#var option_09hand : String
+#var option_10outr : String
+#var option_11neck : String
+#var option_12face : String
+#var option_13hair : String
+#var option_14head : String
 
+var style_settings : Dictionary = {}
 
 const LAYERS : Array[String] = [
 	"00undr",
@@ -43,6 +44,15 @@ const LAYERS : Array[String] = [
 
 var animation_player : AnimationPlayer
 
+func _set(property, value):
+	if LAYERS.has(property):
+		style_settings[property] = value
+
+func _get(property):
+	if LAYERS.has(property):
+		return style_settings[property]
+	
+
 func _get_property_list() -> Array:
 	var props : Array[Dictionary] = []
 	
@@ -57,7 +67,7 @@ func _get_property_list() -> Array:
 		
 		if files.size() > 0:
 			props.append({
-				name = "option_%s" % L,
+				name = L,
 				type = TYPE_STRING,
 				hint = PROPERTY_HINT_ENUM,
 				hint_string = ','.join(files)
@@ -78,7 +88,46 @@ var defined_animations = [
 ]
 
 func _ready():
+	build_animations()
+	randomize_style()
+	refresh_sprites()
+	animation_player.play("character_animations/idle")
+
+func randomize_style():
+	var rng = RandomNumberGenerator.new()
 	
+	var prop_list = get_property_list()
+	for p in prop_list:
+		if LAYERS.has(p.name):
+			var values = p.hint_string.split(",")
+			var i = rng.randi_range(0, values.size() - 1)
+			set(p.name, values[i])
+
+
+
+func refresh_sprites():
+	for L in LAYERS:
+		var sprite : Sprite2D
+		
+		if has_node(L):
+			sprite = get_node(L)
+		else:
+			sprite = Sprite2D.new()
+			sprite.name = L
+			sprite.hframes = 16
+			sprite.vframes = 16
+			add_child(sprite)
+
+		var selected = get(L)
+		if selected:
+			sprite.visible = true
+			var filename = "fbas_%s_%s.png" % [L, selected]
+			sprite.texture = load(opt_dir + "/" + L + "/" + filename)
+		else:
+			sprite.visible = false
+
+
+func build_animations():	
 	animation_player = AnimationPlayer.new()
 	add_child(animation_player)
 
@@ -92,41 +141,25 @@ func _ready():
 		a.length = da.length
 		defined_animations[i].animation = a
 		ap_library.add_animation(da.name, a)
-
-	
-	for L in LAYERS:
-		var selected = get("option_" + L)
-		if selected:
-			var filename = "fbas_%s_%s.png" % [L, selected]
-			
-			var sprite = Sprite2D.new()
-			sprite.name = L
-			sprite.texture = load(opt_dir + "/" + L + "/" + filename)
-			sprite.hframes = 16
-			sprite.vframes = 16
-			add_child(sprite)
-			
-			for da in defined_animations:
-				var a : Animation = da.animation
-				var frame = a.add_track(Animation.TYPE_VALUE)
-				var flip = a.add_track(Animation.TYPE_VALUE)
-				a.track_set_path(frame, "%s:frame" % L)
-				a.track_set_path(flip, "%s:flip_h" % L)
-				
-				a.track_set_interpolation_type(frame, Animation.INTERPOLATION_NEAREST)
-				a.track_set_interpolation_type(flip,  Animation.INTERPOLATION_NEAREST)
-				
-				for i in da.frames.size():
-					var t : float = da.frame_time[i] if typeof(da.frame_time) == TYPE_ARRAY else (i * da.frame_time)
-					a.track_insert_key(frame, t, da.frames[i])
-				
-				if typeof(da.flip) == TYPE_ARRAY:
-					for i in da.flip.size():
-						var t : float = da.frame_time[i] if typeof(da.frame_time) == TYPE_ARRAY else (i * da.frame_time)
-						a.track_insert_key(flip, t, da.flip[i])
-				else:
-					a.track_insert_key(flip, 0, da.flip)
-
 		
-	animation_player.play("character_animations/idle")
-
+	for L in LAYERS:
+		for da in defined_animations:
+			var a : Animation = da.animation
+			var frame = a.add_track(Animation.TYPE_VALUE)
+			var flip = a.add_track(Animation.TYPE_VALUE)
+			a.track_set_path(frame, "%s:frame" % L)
+			a.track_set_path(flip, "%s:flip_h" % L)
+			
+			a.track_set_interpolation_type(frame, Animation.INTERPOLATION_NEAREST)
+			a.track_set_interpolation_type(flip,  Animation.INTERPOLATION_NEAREST)
+			
+			for i in da.frames.size():
+				var t : float = da.frame_time[i] if typeof(da.frame_time) == TYPE_ARRAY else (i * da.frame_time)
+				a.track_insert_key(frame, t, da.frames[i])
+			
+			if typeof(da.flip) == TYPE_ARRAY:
+				for i in da.flip.size():
+					var t : float = da.frame_time[i] if typeof(da.frame_time) == TYPE_ARRAY else (i * da.frame_time)
+					a.track_insert_key(flip, t, da.flip[i])
+			else:
+				a.track_insert_key(flip, 0, da.flip)
