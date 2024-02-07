@@ -1,0 +1,24 @@
+[gd_scene load_steps=2 format=3 uid="uid://bt4rfsylw55tu"]
+
+[ext_resource type="Script" path="res://charcter.gd" id="1_0uk4n"]
+
+[node name="Character" type="Node2D"]
+texture_filter = 1
+position = Vector2(2.08165e-12, -12)
+script = ExtResource("1_0uk4n")
+opt_dir = "res://assets/farmer_base_sheets"
+option_00undr = ""
+option_01body = ""
+option_02sock = ""
+option_03fot1 = ""
+option_04lwr1 = null
+option_05shrt = null
+option_06lwr2 = null
+option_07fot2 = null
+option_08lwr3 = null
+option_09hand = null
+option_10outr = null
+option_11neck = null
+option_12face = null
+option_13hair = ""
+option_14head = null

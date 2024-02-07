@@ -1,0 +1,40 @@
+[gd_scene load_steps=4 format=3 uid="uid://cf136l63o6sc2"]
+
+[ext_resource type="PackedScene" uid="uid://bt4rfsylw55tu" path="res://charcter.tscn" id="1_02ysm"]
+[ext_resource type="Script" path="res://Test.gd" id="1_efu6e"]
+
+[sub_resource type="Theme" id="Theme_1eu1g"]
+default_font_size = 32
+
+[node name="Test" type="Node2D"]
+script = ExtResource("1_efu6e")
+
+[node name="Character" parent="." instance=ExtResource("1_02ysm")]
+position = Vector2(566, 324)
+scale = Vector2(8, 8)
+option_00undr = "cloakplain_00d"
+option_01body = "human_00"
+option_02sock = "sockshigh_00a"
+option_03fot1 = "sandals_00a"
+option_04lwr1 = "undies_00a"
+option_05shrt = "tanktop_00a"
+option_06lwr2 = "overalls_00a"
+option_07fot2 = "cuffedboots_00a"
+option_08lwr3 = "longdress_00a"
+option_09hand = "gloves_00a"
+option_10outr = "suspenders_00a"
+option_11neck = "cloakplain_00d"
+option_12face = "glasses_00a"
+option_13hair = "flattop_00"
+option_14head = "cowboyhat_01"
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="OptionButton" type="OptionButton" parent="CanvasLayer"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 61.0
+offset_bottom = 36.0
+theme = SubResource("Theme_1eu1g")
+
+[connection signal="item_selected" from="CanvasLayer/OptionButton" to="." method="_on_option_button_item_selected"]

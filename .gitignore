@@ -1,0 +1,5 @@
+# Godot 4+ specific ignores
+.godot/
+
+assets/farmer_base_sheets/
+assets/farmer_base_effects/
