@@ -102,7 +102,7 @@ var defined_animations = [
 	{ "name": "run_right",       "loop_mode": Animation.LOOP_LINEAR, "frame_time": [0, 0.080, 0.135, 0.250, 0.330, 0.385], "length": 0.50, "frames": [64, 65, 70, 67, 68, 71],  "flip": 0 },
 	{ "name": "death",           "loop_mode": Animation.LOOP_NONE,   "frame_time": [0, 0.2, 0.4, 0.5, 0.7],                "length": 1.00, "frames": [178, 179, 180, 179, 180], "flip": 0 },
 	{ "name": "forehand_strike", "loop_mode": Animation.LOOP_NONE,   "frame_time": [0, 0.18, 0.26, 0.34],                  "length": 0.64, "frames": [131, 132, 133, 133],      "flip": 0 },
-	
+	# TODO - fill in some more of these!
 ]
 
 func _ready():
@@ -126,7 +126,6 @@ func randomize_colours():
 		if child is Node2D and child.material is RampShaderMaterial:
 			if child.material.type != "":
 				set(child.name + "_style", rng.randi_range(0, child.material.num_styles))
-				#child.material.set_style(rng.randi_range(0, child.material.num_styles))
 
 func refresh_sprites():
 	for L in LAYERS:

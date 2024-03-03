@@ -79,8 +79,6 @@ func set_ramp(layer_name: String, _type : String):
 	set_shader_parameter("seed2_ramp", seed2_ramp)
 	set_shader_parameter("seed2_ramp_steps", seed2_ramp_steps)
 
-	#if seed_ramp:
-		#self.num_styles = floor(seed_ramp.get_size().y / 2)
 
 func set_style(style : int):
 	style = clampi(style, 0, self.num_styles - 1)
