@@ -15,3 +15,7 @@ func _on_option_button_item_selected(index):
 func _on_randomize_character_button_pressed():
 	c.randomize_style()
 	c.refresh_sprites()
+
+func _on_randomize_colours_button_pressed():
+	c.randomize_colours()
+	c.refresh_sprites()

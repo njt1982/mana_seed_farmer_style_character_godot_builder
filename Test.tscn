@@ -15,20 +15,7 @@ script = ExtResource("1_efu6e")
 [node name="Character" parent="." instance=ExtResource("1_02ysm")]
 position = Vector2(566, 324)
 scale = Vector2(8, 8)
-00undr = "cloakplain_00d"
-02sock = "sockslow_00a"
-03fot1 = "boots_00a"
-04lwr1 = "longpants_00a"
-05shrt = "bra_00a"
-06lwr2 = "overallsboobs_00a"
-07fot2 = "curlytoeshoes_00a"
-08lwr3 = "frillyskirt_00a"
-09hand = "gloves_00a"
-10outr = "vest_00a"
-11neck = "scarf_00b"
-12face = "shades_00a"
-13hair = "dapper_00"
-14head = "cowboyhat_01"
+01body_style = null
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -49,10 +36,17 @@ layout_mode = 2
 layout_mode = 2
 theme = SubResource("Theme_1eu1g")
 
-[node name="Button" type="Button" parent="CanvasLayer/MarginContainer/HFlowContainer"]
+[node name="btnRandomStyle" type="Button" parent="CanvasLayer/MarginContainer/HFlowContainer"]
 layout_mode = 2
 theme = SubResource("Theme_xlqhf")
-text = "Randomize Style"
+text = "Random Style"
+
+[node name="btnRandomColour" type="Button" parent="CanvasLayer/MarginContainer/HFlowContainer"]
+layout_mode = 2
+theme = SubResource("Theme_xlqhf")
+text = "Random Colour
+"
 
 [connection signal="item_selected" from="CanvasLayer/MarginContainer/HFlowContainer/OptionButton" to="." method="_on_option_button_item_selected"]
-[connection signal="pressed" from="CanvasLayer/MarginContainer/HFlowContainer/Button" to="." method="_on_randomize_character_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/MarginContainer/HFlowContainer/btnRandomStyle" to="." method="_on_randomize_character_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/MarginContainer/HFlowContainer/btnRandomColour" to="." method="_on_randomize_colours_button_pressed"]

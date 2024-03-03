@@ -6,21 +6,6 @@ class_name Character
 @export_group("Character Config")
 @export_dir var opt_dir = "res://assets/farmer_base_sheets"
 
-#var option_00undr : String
-#var option_01body : String
-#var option_02sock : String
-#var option_03fot1 : String
-#var option_04lwr1 : String
-#var option_05shrt : String
-#var option_06lwr2 : String
-#var option_07fot2 : String
-#var option_08lwr3 : String
-#var option_09hand : String
-#var option_10outr : String
-#var option_11neck : String
-#var option_12face : String
-#var option_13hair : String
-#var option_14head : String
 
 var style_settings : Dictionary = {}
 
@@ -46,10 +31,28 @@ var animation_player : AnimationPlayer
 
 func _set(property, value):
 	if LAYERS.has(property):
+		if value == "None":
+			style_settings.erase(property)
+			style_settings.erase(property + "_style")
+		else:
+			style_settings[property] = value
+			style_settings[property + "_style"] = 0
+			
+			if property == "14head":
+				if value.ends_with("_e"):
+					self.set("13hair", "None")
+
+		if Engine.is_editor_hint():
+			refresh_sprites()
+			notify_property_list_changed()
+	elif property.ends_with("_style"):
 		style_settings[property] = value
+		if Engine.is_editor_hint():
+			refresh_sprites()
+
 
 func _get(property):
-	if LAYERS.has(property):
+	if (LAYERS.has(property) or property.ends_with("_style")) and style_settings.has(property):
 		return style_settings[property]
 	
 
@@ -58,6 +61,10 @@ func _get_property_list() -> Array:
 	
 	for L in LAYERS:
 		var files : Array[String] = []
+		
+		# Body is not optional! ;)
+		if L != "01body":
+			files.append("None")
 		
 		for f in DirAccess.get_files_at(opt_dir + "/" + L):
 			if f.ends_with(".png"):
@@ -69,13 +76,24 @@ func _get_property_list() -> Array:
 			props.append({
 				name = L,
 				type = TYPE_STRING,
+				usage = PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT,
 				hint = PROPERTY_HINT_ENUM,
 				hint_string = ','.join(files)
 			})
+			
+			if get(L):
+				props.append({
+					name = L + "_style",
+					type = TYPE_INT,
+					usage = PROPERTY_USAGE_DEFAULT,
+					hint = PROPERTY_HINT_RANGE,
+					hint_string = "0,50"  # TODO - calculate from the shader?
+				})
+			
 	return props
 
 var defined_animations = [
-	{ "name": "idle",            "loop_mode": Animation.LOOP_NONE,   "frame_time": 1,                                      "length": 0.81, "frames": [0],                       "flip": 0 },
+	{ "name": "idle",            "loop_mode": Animation.LOOP_NONE,   "frame_time": 1,                                      "length": 1.00, "frames": [0],                       "flip": 0 },
 	{ "name": "walk_down",       "loop_mode": Animation.LOOP_LINEAR, "frame_time": 0.135,                                  "length": 0.81, "frames": [48, 49, 50, 48, 49, 50],  "flip": [0, 0, 0, 1, 1, 1] },
 	{ "name": "walk_up",         "loop_mode": Animation.LOOP_LINEAR, "frame_time": 0.135,                                  "length": 0.81, "frames": [52, 53, 54, 52, 53, 54],  "flip": [0, 0, 0, 1, 1, 1] },
 	{ "name": "walk_right",      "loop_mode": Animation.LOOP_LINEAR, "frame_time": 0.135,                                  "length": 0.81, "frames": [64, 65, 66, 67, 68, 69],  "flip": 0 },
@@ -89,7 +107,6 @@ var defined_animations = [
 
 func _ready():
 	build_animations()
-	randomize_style()
 	refresh_sprites()
 	animation_player.play("character_animations/idle")
 
@@ -103,12 +120,18 @@ func randomize_style():
 			var i = rng.randi_range(0, values.size() - 1)
 			set(p.name, values[i])
 
-
+func randomize_colours():
+	var rng = RandomNumberGenerator.new()
+	for child in get_children():
+		if child is Node2D and child.material is RampShaderMaterial:
+			if child.material.type != "":
+				set(child.name + "_style", rng.randi_range(0, child.material.num_styles))
+				#child.material.set_style(rng.randi_range(0, child.material.num_styles))
 
 func refresh_sprites():
 	for L in LAYERS:
-		var sprite : Sprite2D
 		
+		var sprite : Sprite2D
 		if has_node(L):
 			sprite = get_node(L)
 		else:
@@ -116,16 +139,34 @@ func refresh_sprites():
 			sprite.name = L
 			sprite.hframes = 16
 			sprite.vframes = 16
+			
+			# Apply shader
+			sprite.material = RampShaderMaterial.new()
 			add_child(sprite)
 
 		var selected = get(L)
-		if selected:
+		if selected and selected is String:
 			sprite.visible = true
 			var filename = "fbas_%s_%s.png" % [L, selected]
 			sprite.texture = load(opt_dir + "/" + L + "/" + filename)
+			
+			var first_underscore_pos = selected.find("_")
+			if first_underscore_pos > -1:
+				var ramp_name = selected.substr(first_underscore_pos + 1)
+				# Occasionally there may be something like a trailing _e, remove it.
+				if ramp_name.find("_") > -1:
+					ramp_name = ramp_name.substr(0, ramp_name.find("_"))
+
+				sprite.material.set_ramp(L, ramp_name)
+				var style = get(L + "_style")
+				if style == null:
+					style = 0
+				sprite.material.set_style(style)
+			else:
+				print_debug("No underscore found in: " + selected)
+
 		else:
 			sprite.visible = false
-
 
 func build_animations():	
 	animation_player = AnimationPlayer.new()
